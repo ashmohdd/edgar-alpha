@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <style>
+      .bg { fill: #0b1220; }
+      .card { fill: #101a2f; stroke: #223152; stroke-width: 2; rx: 18; }
+      .title { fill: #e8f0ff; font-family: Inter, Arial, sans-serif; font-size: 34px; font-weight: 800; }
+      .subtitle { fill: #9bb0d0; font-family: Inter, Arial, sans-serif; font-size: 16px; }
+      .h { fill: #e8f0ff; font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 700; }
+      .t { fill: #bcd0f7; font-family: Inter, Arial, sans-serif; font-size: 14px; }
+      .muted { fill: #8aa0c2; font-family: Inter, Arial, sans-serif; font-size: 13px; }
+      .pill { fill: #1a2a4a; stroke: #2b4374; stroke-width: 1.5; rx: 14; }
+      .pillText { fill: #cfe0ff; font-family: Inter, Arial, sans-serif; font-size: 13px; }
+      .arrow { stroke: #60a5fa; stroke-width: 3; fill: none; marker-end: url(#arrowhead); opacity: 0.95; }
+      .arrow2 { stroke: #22c55e; stroke-width: 3; fill: none; marker-end: url(#arrowhead); opacity: 0.95; }
+      .arrow3 { stroke: #a78bfa; stroke-width: 3; fill: none; marker-end: url(#arrowhead); opacity: 0.95; }
+      .badge { fill: #0f2a4f; stroke: #2b4374; stroke-width: 1.5; rx: 10; }
+      .badgeText { fill: #bcd0f7; font-family: Inter, Arial, sans-serif; font-size: 12px; font-weight: 700; }
+      .small { fill: #9bb0d0; font-family: Inter, Arial, sans-serif; font-size: 12px; }
+      .mono { fill: #bcd0f7; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#60a5fa" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900" />
+
+  <text class="title" x="60" y="70">Edgar Alpha — From Filings to a Backtested Signal (Diagram)</text>
+  <text class="subtitle" x="60" y="100">Automates the manual work: ingest EDGAR → parse key sections → quantify language → build signal → evaluate → dashboard</text>
+
+  <!-- Row 1: Inputs -->
+  <rect class="card" x="60" y="140" width="360" height="180" />
+  <text class="h" x="90" y="180">1) Inputs</text>
+  <text class="t" x="90" y="210">SEC EDGAR filings</text>
+  <text class="muted" x="90" y="235">10‑K, 10‑Q (HTML)</text>
+  <text class="t" x="90" y="265">(Optional) Transcripts</text>
+  <text class="muted" x="90" y="290">earnings call text</text>
+
+  <rect class="badge" x="290" y="160" width="110" height="26" />
+  <text class="badgeText" x="305" y="179">REAL DATA</text>
+
+  <!-- Row 1: Ingest -->
+  <rect class="card" x="480" y="140" width="360" height="180" />
+  <text class="h" x="510" y="180">2) Ingestion</text>
+  <text class="t" x="510" y="210">Cached + idempotent</text>
+  <text class="muted" x="510" y="234">Avoid re-downloading</text>
+  <text class="mono" x="510" y="265">make ingest TICKER=AAPL</text>
+
+  <rect class="pill" x="510" y="285" width="300" height="30" />
+  <text class="pillText" x="525" y="306">.cache/edgar/AAPL/*.html</text>
+
+  <!-- Row 1: Parse -->
+  <rect class="card" x="900" y="140" width="360" height="180" />
+  <text class="h" x="930" y="180">3) Parse & normalize</text>
+  <text class="t" x="930" y="210">Extract sections</text>
+  <text class="muted" x="930" y="234">Risk Factors (Item 1A)</text>
+  <text class="muted" x="930" y="256">MD&amp;A (Item 7)</text>
+  <text class="t" x="930" y="285">HTML → clean text</text>
+
+  <!-- Row 1: Store -->
+  <rect class="card" x="1320" y="140" width="220" height="180" />
+  <text class="h" x="1345" y="180">4) Store</text>
+  <text class="t" x="1345" y="210">DuckDB</text>
+  <text class="muted" x="1345" y="234">materialized tables</text>
+  <text class="mono" x="1345" y="265">data/processed/</text>
+  <text class="mono" x="1345" y="285">edgar_alpha.duckdb</text>
+
+  <!-- Arrows row 1 -->
+  <path class="arrow" d="M420,230 C445,230 455,230 480,230" />
+  <path class="arrow" d="M840,230 C865,230 875,230 900,230" />
+  <path class="arrow" d="M1260,230 C1288,230 1295,230 1320,230" />
+
+  <!-- Row 2: Features -->
+  <rect class="card" x="60" y="370" width="520" height="200" />
+  <text class="h" x="90" y="410">5) Feature layer (quantify language)</text>
+  <text class="t" x="90" y="445">Uncertainty / hedging per 1k words</text>
+  <text class="muted" x="110" y="468">may, might, could, uncertain, headwind…</text>
+  <text class="t" x="90" y="498">Guidance verb intensity per 1k words</text>
+  <text class="muted" x="110" y="521">expect, anticipate, forecast, outlook…</text>
+  <text class="t" x="90" y="551">Risk‑factor drift (cosine distance)</text>
+  <text class="muted" x="110" y="574">current Risk Factors vs prior filing</text>
+
+  <rect class="badge" x="410" y="392" width="145" height="26" />
+  <text class="badgeText" x="424" y="411">EXPLAINABLE</text>
+
+  <!-- Row 2: Signal -->
+  <rect class="card" x="640" y="370" width="420" height="200" />
+  <text class="h" x="670" y="410">6) Signal layer</text>
+  <text class="t" x="670" y="445">Combine features → signal</text>
+  <text class="muted" x="670" y="468">signal_raw = sum(features)</text>
+  <text class="muted" x="670" y="490">signal_z = z‑score (within form)</text>
+  <text class="mono" x="670" y="530">make signal TICKER=AAPL</text>
+
+  <!-- Row 2: Evaluation -->
+  <rect class="card" x="1100" y="370" width="440" height="200" />
+  <text class="h" x="1130" y="410">7) Evaluation layer (the “senior” part)</text>
+  <text class="t" x="1130" y="445">Leakage-aware event study</text>
+  <text class="muted" x="1130" y="468">filing date → next trading day close</text>
+  <text class="t" x="1130" y="498">Metrics</text>
+  <text class="muted" x="1130" y="521">IC + Decile spread (+5D returns)</text>
+  <text class="mono" x="1130" y="555">make eval TICKER=AAPL</text>
+
+  <!-- Arrows row 2 -->
+  <path class="arrow2" d="M580,470 C610,470 620,470 640,470" />
+  <path class="arrow2" d="M1060,470 C1085,470 1090,470 1100,470" />
+
+  <!-- Row 3: Outputs -->
+  <rect class="card" x="60" y="620" width="1480" height="220" />
+  <text class="h" x="90" y="660">8) Outputs for finance viewers (what recruiters care about)</text>
+
+  <rect class="pill" x="90" y="690" width="420" height="34" />
+  <text class="pillText" x="110" y="712">Headline: Decile spread chart</text>
+
+  <rect class="pill" x="540" y="690" width="420" height="34" />
+  <text class="pillText" x="560" y="712">Sanity: Signal vs forward return scatter</text>
+
+  <rect class="pill" x="990" y="690" width="520" height="34" />
+  <text class="pillText" x="1010" y="712">Explainability: feature table per filing</text>
+
+  <text class="t" x="90" y="765">Dashboard</text>
+  <text class="muted" x="90" y="788">Streamlit app to view filings → features → signal → evaluation</text>
+  <text class="mono" x="90" y="815">make app</text>
+
+  <rect class="badge" x="1370" y="640" width="150" height="26" />
+  <text class="badgeText" x="1384" y="659">RECRUITER‑READY</text>
+
+  <!-- Connector arrow to outputs -->
+  <path class="arrow3" d="M1320,470 C1370,520 1410,560 1460,620" />
+</svg>

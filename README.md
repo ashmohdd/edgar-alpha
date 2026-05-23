@@ -25,6 +25,13 @@ This project:
 
 ---
 
+## Diagram (how this replaces manual work)
+This is the “big picture” of what Edgar Alpha automates end-to-end:
+
+![Edgar Alpha architecture](docs/architecture.svg)
+
+---
+
 ## Business problem (why this exists)
 A PM/CFO wants early warning. Changes in:
 - risk language (what management chooses to emphasize),
@@ -126,4 +133,3 @@ After running `make eval` and `make app`, screenshot:
 - Add leakage-safe event timestamp alignment (calls vs next open)
 - Add transaction costs + turnover constraints
 - Add multi-ticker universe backtesting + pooled IC/decile results
-
