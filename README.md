@@ -4,44 +4,16 @@
 
 A portfolio-grade system that turns **unstructured financial text** (SEC 10‑K / 10‑Q / 8‑K + optional earnings-call transcripts) into a **quantified, backtested signal**.
 
-> Most NLP repos do toy sentiment on movie reviews. This project does **risk‑factor drift**, **uncertainty language**, and **guidance language change** on real filings—then tests whether it predicts **forward returns**.
+> Most NLP repos do toy sentiment on movie reviews. This project does **risk‑factor drift**, **uncertainty language**, and **guidance verb deltas** on real filings—then tests whether it predicts **forward returns**.
 
 ## What this answers (business problem)
 A PM / CFO wants early warning signals **before** numbers show it:
-- Management tone and hedging language ("uncertain", "headwind", "we expect")
-- Year-over-year change in Risk Factors language (10‑K vs prior 10‑K)
-- MD&A language changes
-
-## Demo (MVP)
-- Select a ticker
-- Pull filings from EDGAR
-- Extract Risk Factors + MD&A sections
-- Compute features (uncertainty counts, drift distance)
-- Build a z-scored signal
-- Evaluate vs **+5D forward returns**
+- Management tone and hedging language
+- YoY change in **Risk Factors** language (10‑K vs prior 10‑K)
+- **Guidance language intensity** changes in MD&A
 
 ## Architecture
-Ingestion (EDGAR; cached/idempotent) → Parsing/normalization (section split) → Feature layer (tone, uncertainty, risk drift) → Signal layer (z-score) → Evaluation (IC/deciles) → Streamlit front end.
-
-## Repo structure
-```
-edgar-alpha/
-├── README.md
-├── data/                     # .gitkeep only (do not commit raw filings)
-├── src/
-│   ├── ingest/               # EDGAR client
-│   ├── parse/                # section splitter
-│   ├── features/             # tone/uncertainty + risk drift
-│   ├── signal/               # build signal table
-│   └── eval/                 # IC + decile spread backtest
-├── notebooks/
-├── app/streamlit_app.py
-├── tests/
-├── requirements.txt
-└── Makefile
-```
-
----
+Ingestion (EDGAR; cached/idempotent) → Parsing/normalization (section split) → Feature layer (uncertainty, guidance verbs, risk drift) → Signal layer (z-score) → Evaluation (IC/deciles) → Streamlit front end.
 
 ## Quickstart
 
@@ -54,40 +26,66 @@ source .venv/bin/activate  # mac/linux
 pip install -r requirements.txt
 ```
 
-### 2) Ingest + build signal
+### 2) Set SEC User-Agent (required)
+Use your real email.
+```bash
+export SEC_USER_AGENT="edgar-alpha (your_email@example.com)"
+# Windows PowerShell:
+# $env:SEC_USER_AGENT="edgar-alpha (your_email@example.com)"
+```
+
+### 3) Ingest + build signal + evaluate
 ```bash
 make ingest TICKER=AAPL
 make signal TICKER=AAPL
 make eval   TICKER=AAPL
 ```
 
-### 3) Run the dashboard
+### 4) Run the dashboard
 ```bash
 make app
 ```
 
 ---
 
-## MVP features implemented
-- EDGAR ingestion for 10‑K filings
-- Section extraction: **Risk Factors** and **MD&A** (best-effort heuristic)
-- Feature set:
-  - Uncertainty lexicon count per 1k words
-  - Risk-factor drift: cosine distance between current vs prior 10‑K Risk Factors
-- Signal: z-score of (uncertainty + drift)
-- Evaluation: forward 5 trading-day return + Information Coefficient (IC)
+## What’s implemented (MVP+)
+### Filings
+- 10‑K and 10‑Q ingestion from EDGAR (cached, idempotent)
 
-## Limitations (honest)
-- Filings vary in structure; section parsing is heuristic.
-- MVP uses a simple lexicon + TF-IDF cosine drift. A production system would add:
-  - robust HTML/text extraction, better section labeling
-  - point-in-time transcript ingestion
-  - leakage-safe event-time alignment (call timestamps)
-  - transaction cost model and turnover constraints
+### Parsing
+- HTML→text cleanup
+- Best-effort section extraction:
+  - Risk Factors (Item 1A)
+  - MD&A (Item 7)
 
-## What I’d productionize next
-- Add 10‑Q and 8‑K events; build an event calendar
-- Add guidance extraction (ranges, verbs) with confidence scoring
-- Add anomaly flags (tone vs reported KPI divergence)
-- Move corpus + features into DuckDB with incremental updates
+### Features
+- Uncertainty lexicon count per 1k words
+- Guidance verb intensity per 1k words (expects/anticipates/forecast/project/outlook)
+- Risk-factor drift (TF‑IDF cosine distance vs prior filing of same form)
 
+### Storage
+- DuckDB database at `data/processed/edgar_alpha.duckdb`
+  - `filings` (corpus)
+  - `features` (feature table)
+  - `eval` (event-level forward returns + deciles)
+
+### Evaluation
+- Forward return horizon: +5 trading days (configurable)
+- Information Coefficient (IC)
+- Decile spread (mean forward return by signal decile)
+
+---
+
+## Results (what to screenshot)
+After running `make eval` and `make app`, screenshot:
+- The decile spread bar chart
+- The signal vs forward return scatter
+
+---
+
+## Limitations / what I’d productionize next
+- Better section parsing across issuers and filing formats
+- Add 8‑K events and earnings-call transcripts
+- Add leakage-safe event timestamp alignment (calls vs next open)
+- Add transaction costs and turnover constraints
+- Add multi-ticker universe backtesting

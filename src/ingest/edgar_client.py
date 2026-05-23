@@ -4,7 +4,7 @@ import argparse
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import requests
 
@@ -14,19 +14,16 @@ SEC_ARCHIVES = "https://www.sec.gov/Archives/edgar/data"
 
 
 def _sec_headers() -> Dict[str, str]:
-    # SEC requests a descriptive User-Agent. Set SEC_USER_AGENT in your env.
     ua = os.getenv("SEC_USER_AGENT", "edgar-alpha (email: you@example.com)")
     return {"User-Agent": ua, "Accept-Encoding": "gzip, deflate"}
 
 
 def load_ticker_map() -> Dict[str, str]:
-    """Loads SEC ticker->CIK map from official JSON."""
     url = "https://www.sec.gov/files/company_tickers.json"
     r = requests.get(url, headers=_sec_headers(), timeout=30)
     r.raise_for_status()
     data = r.json()
 
-    # data is dict keyed by integer-like strings
     out = {}
     for _, row in data.items():
         out[row["ticker"].upper()] = str(row["cik_str"]).zfill(10)
@@ -64,8 +61,6 @@ def list_recent_filings(submissions: dict, forms: List[str]) -> List[dict]:
 
 
 def download_filing_text(cik10: str, accession_nodash: str, primary_doc: str) -> str:
-    # Example:
-    # https://www.sec.gov/Archives/edgar/data/<CIK>/<ACCESSION>/<PRIMARYDOC>
     url = f"{SEC_ARCHIVES}/{int(cik10)}/{accession_nodash}/{primary_doc}"
     r = requests.get(url, headers=_sec_headers(), timeout=60)
     r.raise_for_status()
@@ -86,7 +81,7 @@ def save_raw(ticker: str, filing: dict, text: str, out_dir: Path) -> Path:
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--ticker", required=True)
-    p.add_argument("--forms", default="10-K")
+    p.add_argument("--forms", default="10-K,10-Q")
     p.add_argument("--out", default=".cache/edgar")
     args = p.parse_args()
 
@@ -105,8 +100,7 @@ def main() -> None:
 
     out_dir = Path(args.out) / ticker
 
-    # idempotent: skip if file exists
-    for f in filings[:6]:
+    for f in filings[:24]:
         fname = f"{ticker}_{f['form']}_{f['filing_date']}_{f['accession']}.html"
         path = out_dir / fname
         if path.exists():
