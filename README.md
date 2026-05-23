@@ -32,6 +32,40 @@ This is the “big picture” of what Edgar Alpha automates end-to-end:
 
 ---
 
+## Demo (example run: AAPL)
+This repo is designed so a finance viewer can reproduce the full workflow in minutes.
+
+### Run the pipeline
+```bash
+export SEC_USER_AGENT="edgar-alpha (your_email@example.com)"
+make ingest TICKER=AAPL
+make signal TICKER=AAPL
+make eval   TICKER=AAPL
+make app
+```
+
+### What gets generated (artifacts)
+After the run you will have:
+- Cached filings (local): `.cache/edgar/AAPL/*.html`
+- Signal table: `data/processed/signal.csv`
+- Event study output: `data/processed/eval.csv`
+- Decile chart data: `data/processed/decile_spread.csv`
+- DuckDB database: `data/processed/edgar_alpha.duckdb`
+
+### What you’ll see in the dashboard
+- **Signal table** (per filing): uncertainty, guidance intensity, risk drift, and `signal_z`
+- **Signal over time** split by form (10‑K vs 10‑Q)
+- **Signal vs +5D forward return** scatter (sanity check)
+- **Decile spread chart** (headline): mean +5D return by signal decile
+
+### Example interpretation (finance language)
+If the top signal deciles show meaningfully different forward returns vs the bottom deciles, that suggests the language features
+(uncertainty, guidance verbs, risk drift) capture information that markets may price with a lag after filings.
+If the decile spread is flat, that result is still useful: it indicates this specific feature mix may not be predictive for that ticker/horizon,
+and should be improved (more filings, better section parsing, add transcripts/8‑Ks, multi-ticker testing).
+
+---
+
 ## Business problem (why this exists)
 A PM/CFO wants early warning. Changes in:
 - risk language (what management chooses to emphasize),
